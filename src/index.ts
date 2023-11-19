@@ -26,7 +26,15 @@ export default {
 		}
 
 		if(cache.has(id)) {
-			return new Response((await fetch(cache.get(id)!, request)).body);
+
+			let response: Response = await fetch(cache.get(id)!);
+
+			return new Response(response.body, {
+				headers: {
+					'Content-Type': response.headers.get('Content-Type') ?? 'image/unknown'
+				}
+			});
+
 		}
 
 		let summary: SteamAPI.PlayerSummary;
@@ -36,11 +44,15 @@ export default {
 			return new Response('Invalid ID provided', { status: 400 });
 		}
 
-		let response: Response = await fetch(summary.avatar.large, request);
+		let response: Response = await fetch(summary.avatar.large);
 
 		cache.set(id, summary.avatar.large);
 
-		return new Response(response.body);
+		return new Response(response.body, {
+			headers: {
+				'Content-Type': response.headers.get('Content-Type') ?? 'image/unknown'
+			}
+		});
 
 	}
 };
